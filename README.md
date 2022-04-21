@@ -55,6 +55,9 @@
       - [Como insertar una plataforma a un root sin VPN](#plataforma_root)
     - [💡 Cómo ejecutar un root?](#ejecutar_root)
 
+  - [⭐ Filtros, Controller y Root en profundidad](#profundo)
+
+
 <br><br><br>
 
 <!-- BB - Plans, Prices & Bundles -->
@@ -866,25 +869,25 @@
 
   #### 💡 Cómo ejecutar un root?
 
-  En caso de algún **imprevisto o mantenimiento** tenemos que saber como **detener o ejecutar un root**.  
+  En caso de algún **imprevisto, mantenimiento o simplemente de estar a cargo de los servidores** tenemos que saber como **detener o ejecutar un root**.  
   Para ese caso tenemos que tener en claro que **la ejecución de un root se hace por medio de un archivo ".py"** llamado root_testing.py o all_root.py, por lo que detener ejecución es tan simple como frenar cualquier otro script **usando "CTRL + C"**.
 
-  Una vez que estemos listos para poner en ejecución un root debemos hacer lo siguiente:
+  Una vez que estemos listos para poner en ejecución un root debemos escribir: python "archivo .py del root" --l "root que queremos ejecutar" --s "pais desde donde comenzar":
   ```shell
-  mi-nombre@pc123:~/path/plans-and-prices$ python root_testing.py --l PreciosE
+  mi-nombre@pc123:~/path/plans-and-prices$ python root_testing.py --l PreciosC
 
   o
 
-  mi-nombre@pc123:~/path/plans-and-prices$ python all_root.py --l PreciosE
+  mi-nombre@pc123:~/path/plans-and-prices$ python all_root.py --l PreciosMX
   ```
 
   Además de esto, si queremos poner a correr desde un país en particular podemos hacer lo siguiente.
   ```shell
-  mi-nombre@pc123:~/path/plans-and-prices$ python root_testing.py --l PreciosE --s BR
+  mi-nombre@pc123:~/path/plans-and-prices$ python root_testing.py --l PreciosP --s BR
 
   o
 
-  mi-nombre@pc123:~/path/plans-and-prices$ python all_root.py --l PreciosE --s BR
+  mi-nombre@pc123:~/path/plans-and-prices$ python all_root.py --l PreciosHMA --s BR
   ```
 
   Tener en cuenta que contamos con las siguientes opciones para el primer parámetro:
@@ -901,12 +904,35 @@
 
   ***IMPORTANTE:*** Prestar atención con qué root ejecutamos en un server. Los roots de ExpressVPN y PureVPN no van a funcionar en otro servidor que no sea PP. Al igual que los roots de HMA y HolaVPN no van a funcionar en otro servidor que no sea PPWin.
 
+  <br><br><br>
+
+  <p id = "profundo"></p>
+
+  ## ⭐ **Filtros, Controller y Root en profundidad.**
+
+
+
+
   <br><br><br><br><br><br>
 
 
 
 
-
+```mermaid
+graph TD
+START(python main.py --c AR NetflixAR) --> A[Proceso de scrapping y armado de payloads]
+A --> B[self.Controller.Upload]
+B --> C{if len.payload != 0}
+C -- False --> STOP
+C -- True --> D{if operation}
+D -- False --> STOP
+D -- True --> E[_controlarCantidadCaracteres]
+E --> F[_controlarCantidadCaracteresDispositivos]
+F --> G[_checkBase]
+G --> H[_checkHistory]
+H --> I[_checkWave]
+I -- True --> STOP
+```
 
 
 
