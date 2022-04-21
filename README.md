@@ -55,6 +55,7 @@
       - [Como insertar una plataforma a un root sin VPN](#plataforma_root)
     - [💡 Cómo ejecutar un root?](#ejecutar_root)
 
+<br><br><br>
 
 <!-- BB - Plans, Prices & Bundles -->
 <p id = "introduccion"></p>
