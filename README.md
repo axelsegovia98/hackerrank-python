@@ -910,11 +910,86 @@
 
   ## ⭐ **Filtros, Controller y Root en profundidad.**
 
+  Vamos a empezar explicando que pasa en el archivo all_root.py.
+
+  all_root.py funciona casi como anteriores roots. La diferencia está en la "salida de los datos". En vez de ver un testamento de plataformas, es un simple cuadradito que indica los datos más importantes.  
+  Una diferencia en el desarrollo del script fue la permanencia del objeto Table, que además de ser un objeto, es un objeto compartido por varios procesos.  
+  Esto tuvo complicaciones y se buscó la manera de hacerlo porque al generar un proceso nuevo este funciona como un script aparte que no comparte datos y variables con otros procesos creados ni con el proceso padre. Por lo que para poder lograrlo se tuvo que instanciar al objeto Table como una clase padre usando las herramientas de la librería multiprocessing, que permite que esa clase pueda interactuar con todos los procesos creados en el script.  
+  Lo que vemos en pantalla en uno de los 4 procesos que se ejecutan en el script. Independientemente a todo lo demás este proceso está encerrado en un bucle infinito y cada un segundo busca actualizar los prints del objeto Table.
+  
+  Este root, por otro lado realiza checkeos sobre el estatus de conexión a intenet, y el estatus de lugar al que se conecto, verificando de que cuando figure que está conectado a un pais, en realidad se haya conectado a un pais y no figure la ubicación de origen del servidor.
+
+  Por otro lado, está preparado para usarse en cualquier servidor, sea para Ubuntu como para Windows, incluidos todos los VPN.
+
+  Por último y más importante la forma de ejecución y la lista jacuzzi.
+
+  Es una lista vacía con 3 elementos que son listas vacías, en las que se van repartiendo plataformas para cada una hasta que no hayan más. Cada una de estas listas van a ser utilizada como las tareas que cada proceso va a realizar, por lo que si se desea agregar un proceso más, basta con agregar otra lista vacía a jacuzzi y otro proceso. (También modificar un poco la clase Monitor para ver los cambios).  
+
+  Al terminar se actualiza el objeto Table, se deconecta el VPN y se checkea si el día cambio para reiniciar los datos y ejecutar todas las plataformas.
+
+  Empecemos por definir las funciones que existen y que hacen cada una:
+
+  La función **multiP()** se encarga de llamar a la función **cmd()** enviandole los parámetros necesarios para poder ejecutar la plataforma.
+
+  Los parámetros que necesita esta función son:
+
+  - platform [dict](#)
+  > Como indica su nombre, es la **platform** que va a ser ejecutada, no solo el nombre, si no el json diccionario que ponemos en el root por plataforma.
+
+  - Table [Object](#)
+  > Table es un objeto que va a mantener en constante actualización el estado de las plataformas ejecutadas. Se instancia como clase padre en el código y se la usa por este método para mantener esa actualización mencionada.
 
 
+  La función **cmd()** se encarga de ejecutar una plataforma mediante la **librería subprocess**, y de checkear el status con el que termina el script. Siendo que si se detecta una salida con código 1 o 2, se carga el log en el mongo y se actualiza en el objeto Table en las plataformas que fallan. Si se detecta una salida con código 0 se intenta eliminar el log en el mongo y se actualiza en el mongo el objeto Table.
 
+  Los parámetros que necesita esta función son:
+
+  - command [dict](#)
+  > Es string que contiene el comando de ejecución necesario para ejecutar una plataforma que se arma en la función **multiP**.
+
+  - text [str](#)
+  > Es un string que contiene el pais y el nombre de la clase de la plataforma.
+
+  - Table [Object](#)
+  > Table es un objeto que va a mantener en constante actualización el estado de las plataformas ejecutadas. Se instancia como clase padre en el código y se la usa por este método para mantener esa actualización mencionada.
+
+
+  La función **checkWave()** se encarga de checkear que plataformas se ejecutaron en el día y cuales no.
+
+  Los parámetros que necesita esta función son:
+
+  - plataformas [list](#)
+  > Lista que contiene los diccionarios de cada plataforma de un determinado root. .
+
+  - Devuelve una **lista**
+  > Devuelve una lista con dos elementos, el primer elemento es una lista con los diccionarios plataformas que deben ejecutarse; el segundo elemento es también una lista con los diccionarios plataformas que ya se ejecutaron.
+
+
+  La función **findPaths()** devuelve el diccionario de los rutas de los json.
+
+  - Devuelve un **diccionario**
+  > Devuelve un diccionario que tiene como claves los nombres de los roots y como valor la ruta de esos mismos.
+
+
+  La función **pool()** se encarga de actualizar el objeto Table; crear, ejecutar y cerrar el proceso por cada una de las plataformas que se le pasan como parámetro. Una vez terminado actualiza el objeto Table informando que ya no hay plataformas ejecutandose. 
+
+  Los parámetros que necesita esta función son:
+
+  - Table [Object](#)
+  > Table es un objeto que va a mantener en constante actualización el estado de las plataformas ejecutadas. Se instancia como clase padre en el código y se la usa por este método para mantener esa actualización mencionada.
+
+  - tasks [list](#)
+  > Es la lista de plataformas que tienen que ejecutarse en determinado proceso. Esta lista se crea poco más adelante cuando se declara la lista **jacuzzi** (ver código)
+
+  - processName [str](#)
+  > Es un nombre que va a identificar cual de los 3 procesos es el que la plataforma se está ejecutando.
   <br><br><br><br><br><br>
 
+
+  La función **refresher()** se encargar de crear un 4to proceso en donde se crea un bucle infinito y se actualiza la información del objeto Table cada un segundo.
+
+  - Table [Object](#)
+  > Table es un objeto que va a mantener en constante actualización el estado de las plataformas ejecutadas. Se instancia como clase padre en el código y se la usa por este método para mantener esa actualización mencionada.
 
 
 
