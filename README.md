@@ -983,14 +983,13 @@
 
   - processName [str](#)
   > Es un nombre que va a identificar cual de los 3 procesos es el que la plataforma se está ejecutando.
-  <br><br><br><br><br><br>
-
 
   La función **refresher()** se encargar de crear un 4to proceso en donde se crea un bucle infinito y se actualiza la información del objeto Table cada un segundo.
 
   - Table [Object](#)
   > Table es un objeto que va a mantener en constante actualización el estado de las plataformas ejecutadas. Se instancia como clase padre en el código y se la usa por este método para mantener esa actualización mencionada.
 
+  <br><br><br><br><br><br>
 
 
 ```mermaid
