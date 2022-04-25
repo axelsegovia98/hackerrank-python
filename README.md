@@ -58,6 +58,8 @@
   - [⭐ Filtros, Controller y Root en profundidad](#advanced)
     - [🎁 Root](#advanced_root)
     - [🔮 Filtros](#advanced_filter)
+      - [Primer Filtro](#advanced_filter_f)
+      - [Segundo Filtro](#advanced_filter_s)
     - [🗿 PPWin](#advanced_ppwin)
 
 
@@ -1016,6 +1018,8 @@
 
   Tenemos que tener en cuenta que tenemos dos filtros, el primero se ejecuta con el método **lengthCaracteresChannel** analizando los datos que le damos como parámetro, y el segundo se ejecuta cuando primer filtro detecta cambios.
 
+  <p id = "advanced_filter_f"></p>
+
   El primer filtro **primero determina en qué idioma puede estar la totalidad del texto** que se le pasa como parámetro lo agrega a la lista *self.lang* del objeto Controller y **luego divide ese texto en líneas** convirtiendolo en una lista. Esta lista después **se agrupa de a 4 elementos y los guarda en una lista nueva**, para facilitar el análisis.  
   Se itera sobre esta nueva lista en donde **se checkea cual puede ser el idioma del elemento** y se lo agrega también a self.lang, posterior a esto dentro del mismo **se busca hacer un match con 3 tipos de filtros**.  
 
@@ -1050,31 +1054,33 @@
 
   Ambas líneas tienen datos que para nosotros son relevantes, pero en este caso el "tan solo" va a modificar la cantidad de caracteres que teníamos y podría resultar en el envío de una alerta si no fuera por nuestro héroe, el segundo filtro.  
 
+  <br>
+  <p id = "advanced_filter_s"></p>
 
   El segundo filtro se apoya en tres pilares para su correcto funcionamiento.
   
-  - Payload
-  Tenemos que tener de forma obligatoria la clave "TextoCaracteres" en el payload. Es exactamente lo mismo que le pasamos al primer filtro como parámetro, y sirve para luego en el segundo filtro hacer un análisis comparativo del texto y determinar si el cambio de caracteres tiene algo relevante, y para subirlo a la base de datos para hacer futuros análisis.
+  - **Payload**
+  Tenemos que tener de forma **obligatoria la clave "TextoCaracteres"** en el payload. Es exactamente **lo mismo que le pasamos al primer filtro como parámetro**, y sirve para luego en el segundo filtro hacer un análisis comparativo del texto y determinar si el cambio de caracteres tiene algo relevante y para subirlo a la base de datos para hacer futuros análisis.
 
-  - Primer Filtro
-  Un buen uso del primer filtro nos puede asegurar un buen funcionamiento del segundo filtro.  
+  - **Primer Filtro**
+  **Un buen uso del primer filtro nos puede asegurar un buen funcionamiento del segundo filtro.**  
   Habíamos mencionado que los idiomas que son detectados relevantes en el primer filtro son agregados a la lista self.lang, y esta luego es utilizada para evitar estar checkeando los idiomas por segunda vez.
 
-  - Datos en el mongo
-  Para que el segundo filtro funcione si o si tienen que existir datos previos en el mongo. El objeto Controller ya se encarga de hacer un insert de la data y omitir el uso del segundo filtro en caso de detectar que no existen datos previos.
+  - **Datos en el mongo**
+  **Para que el segundo filtro funcione si o si tienen que existir datos previos en el mongo**. *El objeto Controller ya se encarga de hacer un insert de la data* y omitir el uso del segundo filtro en caso de detectar que no existen datos previos.
 
-  Para hablar del segundo filtro antes tenemos que hablar del método Upload.  
+  **Para hablar del segundo filtro antes tenemos que hablar del método Upload.**  
 
   El método Upload del objeto Controller se ejecuta al final del cada script, y este en caso de detectar que self.operation es True, ejecuta 5 métodos encargados de analizar, cargar y enviar alertas en caso de ser necesarias. 
-  En este caso vamos a hablar del primer método que es _controlarCantidadCaracteres().  
+  En este caso vamos a hablar del primer método que es **_controlarCantidadCaracteres().**  
 
-  _controlarCantidadCaracteres() es el método encargado de (como dice su nombre xd) controlar la cantidad de caracteres de los planes y enviar las alertas.  
+  _controlarCantidadCaracteres() es el método encargado de (como dice su nombre xd) **controlar la cantidad de caracteres de los planes y enviar las alertas**.  
 
-  Su funcionamiento es el siguiente.
-  Primero que todo convierte en un set y después en una lista a la variable self.lang, esto es para borrar elementos duplicados. Posterior a eso itera sobre la lista payload, en la que en cada elemento va a checkear si la key "TextoCaracteres" posee un valor con un tipo de dato string que en caso de no serlo lo intenta convertir a string.  
-  Retomando un poco de lo que habíamos dicho sobre el tercer pilar sobre los que se apoya el segundo filtro, en caso de no existir en la base de datos un elemento que contenga el mismo platformCode, Categoria (nombre del plan) y país se va a hacer un insert de estos datos necesarios dentro de la colección CharChanges y se pasa directamente a analizar el siguiente payload.  
+  - Su funcionamiento es el siguiente:
+  Primero que todo convierte en un set y después en una lista a la variable self.lang, esto es para **borrar elementos duplicados**. Posterior a eso itera sobre la lista payload, en la que en cada elemento va a checkear si la key "TextoCaracteres" posee un valor con un tipo de dato string que en caso de no serlo lo intenta convertir a string.  
+  Retomando un poco de lo que habíamos dicho sobre el tercer pilar sobre los que se apoya el segundo filtro, **en caso de no existir en la base de datos un elemento** que contenga el mismo platformCode, Categoria (nombre del plan) y Country se va a hacer un insert de estos datos necesarios dentro de la colección CharChanges y se pasa directamente a analizar el siguiente payload.  
   
-  En caso de que ya exista dicho elemento en la base de datos se busca planes existentes que coincidan con la búsqueda y se analiza si la cantidad de caracteres del payload de la base datos es igual a la cantidad de caracteres del payload recién scrapeado. En caso de ser igual se termina de recorrer los planes encontrados y se pasa al siguiente payload, por otro lado si no coinciden se consulta si la función _compareChannelText() (segundo filtro) detecta cambios relevantes, que en caso de encontrarlos envia la notificación y si no se avisa que no hay cambios relevantes y se pasa al siguiente payload.
+  En caso de que ya exista dicho elemento en la base de datos **se busca planes existentes que coincidan con la búsqueda** y se analiza si la cantidad de caracteres del payload de la base datos es igual a la cantidad de caracteres del payload recién scrapeado. En caso de ser igual se termina de recorrer los planes encontrados y se pasa al siguiente payload, por otro lado si no coinciden se consulta si la función _compareChannelText() (segundo filtro) **detecta cambios relevantes**, que en caso de encontrarlos envia la notificación y si no se avisa que no hay cambios relevantes y se pasa al siguiente payload.
 
   _compareChannelText() Es lo que podemos llamar "segundo filtro". Hicimos un largo camino para empezar a explicar su funcionamiento, pero fue necesario para entender de donde nace, que hace y por qué se ejecuta de esta forma.
 
@@ -1086,9 +1092,9 @@
   - Devuelve un **bool**
   > Si se encuentran diferencias retorna True, en caso contrario devuelve False.
 
-  Principalmente lo que hace es normalizar los saltos de línea, tabs, etc en espacios tanto en el payload entrante como en el existente en la base de datos y [tokenizarlos](#w_tokenize).  
-  Una vez tokenizados ambos strings se buscan cuales son los lenguajes detectados en el scrap hecho sumando a lo existente en la base de datos y se procede a buscar en ambos strings palabras relevantes dentro de los filtros de los lenguajes detectados y el de currencies.
-  Habiendo encontrado todas las palabras relevantes existentes dentro de ambos strings se procede a buscar la diferencias entre ambos strings, que de encontrarlas hace un update del registro, tanto del texto como de los lenguajes detectados y retorna True para que las alertas sean enviadas.
+  Principalmente lo que hace es **normalizar** los saltos de línea, tabs, etc en espacios tanto en el payload entrante como en el existente en la base de datos y **[tokenizarlos](#w_tokenize)**.  
+  Una vez tokenizados ambos strings, se buscan cuales son los lenguajes detectados en el scrap hecho sumando a lo existente en la base de datos y se procede a buscar en ambos strings **palabras relevantes dentro de los filtros de los lenguajes detectados y el de currencies**.
+  Habiendo encontrado todas las palabras relevantes existentes dentro de ambos strings se procede a buscar la **diferencias entre ambos strings**, que de encontrarlas hace un update del registro, tanto del texto como de los lenguajes detectados y **retorna True para que las alertas sean enviadas**.
 
   <br>
 
