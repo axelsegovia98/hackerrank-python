@@ -1035,14 +1035,14 @@
   Por otro lado **si se agregó cualquier palabra en la misma línea que contiene una palabra relevante, esta línea va a ser tomada como relevante y va a presentar más cantidad de caracteres:**
 
   - **Caso 1**
-  > Bienvenido a nuestra web!
-  **Ofertas imperdibles**
-  Para vos tenemos los mejores contenidos 
+  > Bienvenido a nuestra web!  
+  **Ofertas imperdibles**  
+  Para vos tenemos los mejores contenidos  
   **Plan mensual a $442 ARS, incluye Disney +**
 
   - **Caso 2**
-  > Bienvenido a nuestra web!
-  **Ofertas imperdibles**
+  > Bienvenido a nuestra web!  
+  **Ofertas imperdibles**  
   Para vos tenemos los mejores contenidos 
   **Plan mensual a *tan solo* $442 ARS, incluye Disney +**
 
