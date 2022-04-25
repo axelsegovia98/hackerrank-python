@@ -1121,7 +1121,7 @@
 
 ```mermaid
 graph TD
-START(python main.py --o scraping --c AR NetflixAR) --> A[Proceso de scrapping y armado de payloads]
+START(python main.py --c AR NetflixAR) --> A[Proceso de scrapping y armado de payloads]
 A --> B[self.Controller.Upload]
 B --> C{if len.payload != 0}
 C -- False --> STOP
