@@ -1043,7 +1043,7 @@
   - **Caso 2**
   > Bienvenido a nuestra web!  
   **Ofertas imperdibles**  
-  Para vos tenemos los mejores contenidos 
+  Para vos tenemos los mejores contenidos  
   **Plan mensual a *tan solo* $442 ARS, incluye Disney +**
 
   *En negrita está lo que el filtro tomaría como linea relevante.* 
