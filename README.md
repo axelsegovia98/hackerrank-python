@@ -55,7 +55,10 @@
       - [Como insertar una plataforma a un root sin VPN](#plataforma_root)
     - [💡 Cómo ejecutar un root?](#ejecutar_root)
 
-  - [⭐ Filtros, Controller y Root en profundidad](#profundo)
+  - [⭐ Filtros, Controller y Root en profundidad](#advanced)
+    - [🎁 Root](#advanced_root)
+    - [🔮 Filtros](#advanced_filter)
+    - [🗿 PPWin](#advanced_ppwin)
 
 
 <br><br><br>
@@ -906,20 +909,24 @@
 
   <br><br><br>
 
-  <p id = "profundo"></p>
+  <p id = "advanced"></p>
 
-  ## ⭐ **Filtros, Controller y Root en profundidad.**
+  ## ⭐ **Root, Filtros y PPWin en profundidad.**
 
-  Vamos a empezar explicando que pasa en el archivo all_root.py.
+  <p id = "advanced_root"></p>
 
-  all_root.py funciona casi como anteriores roots. La diferencia está en la "salida de los datos". En vez de ver un testamento de plataformas, es un simple cuadradito que indica los datos más importantes.  
-  Una diferencia en el desarrollo del script fue la permanencia del objeto Table, que además de ser un objeto, es un objeto compartido por varios procesos.  
-  Esto tuvo complicaciones y se buscó la manera de hacerlo porque al generar un proceso nuevo este funciona como un script aparte que no comparte datos y variables con otros procesos creados ni con el proceso padre. Por lo que para poder lograrlo se tuvo que instanciar al objeto Table como una clase padre usando las herramientas de la librería multiprocessing, que permite que esa clase pueda interactuar con todos los procesos creados en el script.  
+  #### 🎁 Root
+
+  **Vamos a empezar explicando que pasa en el archivo all_root.py.**
+
+  **all_root.py funciona casi como anteriores roots.** La diferencia está en la "salida de los datos". En vez de ver un testamento de plataformas, **es un simple cuadradito que indica los datos más importantes.**  
+  Una diferencia en el desarrollo del script fue la **permanencia del objeto Table**, que además de ser un objeto, es un objeto **compartido por varios procesos**.  
+  Esto tuvo complicaciones y se buscó la manera de hacerlo porque **al generar un proceso nuevo este funciona como un script aparte** que no comparte datos y variables con otros procesos creados ni con el proceso padre. Por lo que para poder lograrlo se tuvo que instanciar al **objeto Table como una clase padre** usando las herramientas de la librería multiprocessing, que permite que esa clase **pueda interactuar con todos los procesos** creados en el script.  
   Lo que vemos en pantalla en uno de los 4 procesos que se ejecutan en el script. Independientemente a todo lo demás este proceso está encerrado en un bucle infinito y cada un segundo busca actualizar los prints del objeto Table.
   
   Este root, por otro lado realiza checkeos sobre el estatus de conexión a intenet, y el estatus de lugar al que se conecto, verificando de que cuando figure que está conectado a un pais, en realidad se haya conectado a un pais y no figure la ubicación de origen del servidor.
 
-  Por otro lado, está preparado para usarse en cualquier servidor, sea para Ubuntu como para Windows, incluidos todos los VPN.
+  Además, está preparado para usarse en cualquier servidor, sea para Ubuntu como para Windows, incluidos todos los VPN.
 
   Por último y más importante la forma de ejecución y la lista jacuzzi.
 
@@ -956,10 +963,10 @@
 
   La función **checkWave()** se encarga de checkear que plataformas se ejecutaron en el día y cuales no.
 
-  Los parámetros que necesita esta función son:
+  El parámetro que necesita esta función es:
 
   - plataformas [list](#)
-  > Lista que contiene los diccionarios de cada plataforma de un determinado root. .
+  > Lista que contiene los diccionarios de cada plataforma de un determinado root.
 
   - Devuelve una **lista**
   > Devuelve una lista con dos elementos, el primer elemento es una lista con los diccionarios plataformas que deben ejecutarse; el segundo elemento es también una lista con los diccionarios plataformas que ya se ejecutaron.
@@ -989,12 +996,116 @@
   - Table [Object](#)
   > Table es un objeto que va a mantener en constante actualización el estado de las plataformas ejecutadas. Se instancia como clase padre en el código y se la usa por este método para mantener esa actualización mencionada.
 
+  <br>
+
+  <p id = "advanced_filter"></p>
+
+  #### 🔮 Filtros
+
+  **Seguimos con los filtros que están implementados en el flujo de datos.**
+
+  Tenemos que tener en cuenta que tenemos dos filtros, el primero se ejecuta con el método **lengthCaracteresChannel** analizando los datos que le damos como parámetro, y el segundo se ejecuta cuando primer filtro detecta cambios.
+
+  El primer filtro primero determina en qué idioma puede estar la totalidad del texto que se le pasa como parámetro lo agrega a la lista self.lang del objeto Controller y luego divide ese texto en líneas convirtiendolo en una lista. Esta lista después se agrupa de a 4 elementos y los guarda en una lista nueva, para facilitar el análisis.  
+  Se itera sobre esta nueva lista en donde se checkea cual puede ser el idioma del elemento y se lo agrega también a self.lang, posterior a esto dentro del mismo se busca hacer un match con 3 tipos de filtros.  
+
+  - Filtro de monedas (currency).
+  - Filtro de idioma del texto general.
+  - Filtro del idioma de la línea de texto. 
+
+  > Estos filtros podemos encontrarlos en el archivo filtros.py
+
+  No hay que olvidar que la finalidad de este primer filtro es de separar en líneas el texto y buscar cuales líneas contienen algo que nos sea relevante, y de ahí contar cuantos caracteres tienen.  
+  Por lo que de encontrar un elemento del filtro currency, o del idioma texto general o del idioma de la línea cumple con esto de contar que dentro de la línea existe algo relevante, que es justamente lo que hace este filtro.  
+  Busca primero usando el filtro currencies que en caso de encontrar algo relevante guarda ese elemento y pasa al siguiente elemento de la lista, y en caso de no encontrar nada pasa a hacer lo mismo pero con el filtro del idioma general. Y ahora se repite la historia otra vez, en caso de encontrar algo relevante en el filtro del idioma general, actúa como lo hizo con el filtro currency y en caso de no encontrar para a buscar en el filtro de idioma de la línea de texto.
+
+  Una vez que terminamos de analizar todos los elementos, las líneas relevantes pasan por una limpieza de espacios, saltos de línea, tabulaciones, etc y se retorna la longitud del resultado de la limpieza de las líneas relevantes.
+
+  Este número recién es nuestro primer paso. Nos sirve para más adelante hacer comparaciones con la base de datos. Si el número de caracteres de la página ya pasado por el filtro (que son solo las líneas relevantes) es el mismo que está en la base de datos (que es de un scrap pasado que también pasó por el filtro), damos por entendido que no hubo ningún cambio en los caracteres relevante en los caracteres.  
+  Por otro lado si se agregó cualquier palabra en la misma línea que contiene una palabra relevante, esta línea va a ser tomada como relevante y va a más cantidad de caracteres:
+
+  - Caso 1
+  > Bienvenido a nuestra web!
+  **Ofertas imperdibles**
+  Para vos tenemos los mejores contenidos 
+  **Plan mensual a $442 ARS, incluye Disney +**
+
+  - Caso 2
+  > Bienvenido a nuestra web!
+  **Ofertas imperdibles**
+  Para vos tenemos los mejores contenidos 
+  **Plan mensual a *tan solo* $442 ARS, incluye Disney +**
+
+  *En negrita está lo que el filtro tomaría como linea relevante.* 
+
+  Ambas líneas tienen datos que para nosotros son relevantes, pero en este caso el "tan solo" va a modificar la cantidad de caracteres que teníamos y podría resultar en el envío de una alerta si no fuera por nuestro héroe, el segundo filtro.  
+
+
+  El segundo filtro se apoya en tres pilares para su correcto funcionamiento.
+  
+  - Payload
+  Tenemos que tener de forma obligatoria la clave "TextoCaracteres" en el payload. Es exactamente lo mismo que le pasamos al primer filtro como parámetro, y sirve para luego en el segundo filtro hacer un análisis comparativo del texto y determinar si el cambio de caracteres tiene algo relevante, y para subirlo a la base de datos para hacer futuros análisis.
+
+  - Primer Filtro
+  Un buen uso del primer filtro nos puede asegurar un buen funcionamiento del segundo filtro.  
+  Habíamos mencionado que los idiomas que son detectados relevantes en el primer filtro son agregados a la lista self.lang, y esta luego es utilizada para evitar estar checkeando los idiomas por segunda vez.
+
+  - Datos en el mongo
+  Para que el segundo filtro funcione si o si tienen que existir datos previos en el mongo. El objeto Controller ya se encarga de hacer un insert de la data y omitir el uso del segundo filtro en caso de detectar que no existen datos previos.
+
+  Para hablar del segundo filtro antes tenemos que hablar del método Upload.  
+
+  El método Upload del objeto Controller se ejecuta al final del cada script, y este en caso de detectar que self.operation es True, ejecuta 5 métodos encargados de analizar, cargar y enviar alertas en caso de ser necesarias. 
+  En este caso vamos a hablar del primer método que es _controlarCantidadCaracteres().  
+
+  _controlarCantidadCaracteres() es el método encargado de (como dice su nombre xd) controlar la cantidad de caracteres de los planes y enviar las alertas.  
+
+  Su funcionamiento es el siguiente.
+  Primero que todo convierte en un set y después en una lista a la variable self.lang, esto es para borrar elementos duplicados. Posterior a eso itera sobre la lista payload, en la que en cada elemento va a checkear si la key "TextoCaracteres" posee un valor con un tipo de dato string que en caso de no serlo lo intenta convertir a string.  
+  Retomando un poco de lo que habíamos dicho sobre el tercer pilar sobre los que se apoya el segundo filtro, en caso de no existir en la base de datos un elemento que contenga el mismo platformCode, Categoria (nombre del plan) y país se va a hacer un insert de estos datos necesarios dentro de la colección CharChanges y se pasa directamente a analizar el siguiente payload.  
+  
+  En caso de que ya exista dicho elemento en la base de datos se busca planes existentes que coincidan con la búsqueda y se analiza si la cantidad de caracteres del payload de la base datos es igual a la cantidad de caracteres del payload recién scrapeado. En caso de ser igual se termina de recorrer los planes encontrados y se pasa al siguiente payload, por otro lado si no coinciden se consulta si la función _compareChannelText() (segundo filtro) detecta cambios relevantes, que en caso de encontrarlos envia la notificación y si no se avisa que no hay cambios relevantes y se pasa al siguiente payload.
+
+  _compareChannelText() Es lo que podemos llamar "segundo filtro". Hicimos un largo camino para empezar a explicar su funcionamiento, pero fue necesario para entender de donde nace, que hace y por qué se ejecuta de esta forma.
+
+  El parámetro que necesita esta función es:
+
+  - payload [dict](#)
+  > Payload que generó el cambio.
+
+  - Devuelve un **bool**
+  > Si se encuentran diferencias retorna True, en caso contrario devuelve False.
+
+  Principalmente lo que hace es normalizar los saltos de línea, tabs, etc en espacios tanto en el payload entrante como en el existente en la base de datos y [tokenizarlos](#w_tokenize).  
+  Una vez tokenizados ambos strings se buscan cuales son los lenguajes detectados en el scrap hecho sumando a lo existente en la base de datos y se procede a buscar en ambos strings palabras relevantes dentro de los filtros de los lenguajes detectados y el de currencies.
+  Habiendo encontrado todas las palabras relevantes existentes dentro de ambos strings se procede a buscar la diferencias entre ambos strings, que de encontrarlas hace un update del registro, tanto del texto como de los lenguajes detectados y retorna True para que las alertas sean enviadas.
+
+  <br>
+
+  <p id = "advanced_ppwin"></p>
+
+  #### 🗿 PPWin
+
+  Como habíamos dicho en secciones anteriores, PPWin es una computadora que tiene Windows como sistema operativo, además de que al igual que el servidor de MX podemos conectarnos usando la herramienta ChromeDesktop.
+
+  Tenemos que tener unas cosas en claro a la hora de usar PPWin. Al ser una computadora que maneja windows no podemos conectarnos a los VPNs mediante comandos en la terminal, así que la única forma es haciendo clicks en la interfaz gráfica de los VPNs para realizar la tarea.  
+  Esto ya nos indica una complicación a la hora de ejecutar un root, ya que en Ubuntu podemos conectarnos directamente desde la terminal, por lo que como respuesta a este desafío desarrollamos un "bot" que hace clicks en puntos específicos de la pantalla para hacer tediosa y repetitiva tarea de desconectar y conectar un VPN.  
+  Esto implica que tenemos que tener mucho cuidado con como nos manejamos con la interfaz gráfica de Windows porque de esto depende directamente el correcto funcionamiento del servidor.  
+  En resumen tenemos que cumplir con lo siguiente para asegurar un correcto funcionamiento de este servidor.
+
+  - No intentar usar el servidor mientras se está ejecutando un root.
+  - No mover de lugar en el escritorio los VPN.
+  - No mover de lugar los íconos que de los VPN en la barra de tareas.
+
+  En caso de ver que las cosas no están en su [correcto lugar](#), avisar a lider o compañeros.
+
+
   <br><br><br><br><br><br>
 
 
 ```mermaid
 graph TD
-START(python main.py --c AR NetflixAR) --> A[Proceso de scrapping y armado de payloads]
+START(python main.py --o scraping --c AR NetflixAR) --> A[Proceso de scrapping y armado de payloads]
 A --> B[self.Controller.Upload]
 B --> C{if len.payload != 0}
 C -- False --> STOP
@@ -1062,6 +1173,10 @@ I -- True --> STOP
   <p id = 'w_hardcode'></p>
 
   **Hardcode:** Abandonar la dinamismo de un lenguaje de programación y escribir a mano un valor.
+
+  <p id = 'w_tokenize'></p>
+
+  **Tokenizar:** Tokenizar un texto consiste en dividir el texto en las unidades que lo conforman, entendiendo por unidad el elemento más sencillo con significado propio para el análisis en cuestión, en este caso, las palabras.
 
 
 
