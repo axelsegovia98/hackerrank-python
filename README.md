@@ -1016,31 +1016,31 @@
 
   Tenemos que tener en cuenta que tenemos dos filtros, el primero se ejecuta con el método **lengthCaracteresChannel** analizando los datos que le damos como parámetro, y el segundo se ejecuta cuando primer filtro detecta cambios.
 
-  El primer filtro primero determina en qué idioma puede estar la totalidad del texto que se le pasa como parámetro lo agrega a la lista self.lang del objeto Controller y luego divide ese texto en líneas convirtiendolo en una lista. Esta lista después se agrupa de a 4 elementos y los guarda en una lista nueva, para facilitar el análisis.  
-  Se itera sobre esta nueva lista en donde se checkea cual puede ser el idioma del elemento y se lo agrega también a self.lang, posterior a esto dentro del mismo se busca hacer un match con 3 tipos de filtros.  
+  El primer filtro **primero determina en qué idioma puede estar la totalidad del texto** que se le pasa como parámetro lo agrega a la lista *self.lang* del objeto Controller y **luego divide ese texto en líneas** convirtiendolo en una lista. Esta lista después **se agrupa de a 4 elementos y los guarda en una lista nueva**, para facilitar el análisis.  
+  Se itera sobre esta nueva lista en donde **se checkea cual puede ser el idioma del elemento** y se lo agrega también a self.lang, posterior a esto dentro del mismo **se busca hacer un match con 3 tipos de filtros**.  
 
-  - Filtro de monedas (currency).
-  - Filtro de idioma del texto general.
-  - Filtro del idioma de la línea de texto. 
+  - **Filtro de monedas (currency).**
+  - **Filtro de idioma del texto general.**
+  - **Filtro del idioma de la línea de texto.**
 
   > Estos filtros podemos encontrarlos en el archivo filtros.py
 
-  No hay que olvidar que la finalidad de este primer filtro es de separar en líneas el texto y buscar cuales líneas contienen algo que nos sea relevante, y de ahí contar cuantos caracteres tienen.  
-  Por lo que de encontrar un elemento del filtro currency, o del idioma texto general o del idioma de la línea cumple con esto de contar que dentro de la línea existe algo relevante, que es justamente lo que hace este filtro.  
-  Busca primero usando el filtro currencies que en caso de encontrar algo relevante guarda ese elemento y pasa al siguiente elemento de la lista, y en caso de no encontrar nada pasa a hacer lo mismo pero con el filtro del idioma general. Y ahora se repite la historia otra vez, en caso de encontrar algo relevante en el filtro del idioma general, actúa como lo hizo con el filtro currency y en caso de no encontrar para a buscar en el filtro de idioma de la línea de texto.
+  No hay que olvidar que **la finalidad de este primer filtro es de separar en líneas el texto y buscar cuales líneas contienen algo que sea relevante**, y de ahí contar cuantos caracteres tienen.  
+  Por lo que de encontrar un elemento del filtro currency, o del idioma texto general o del idioma de la línea cumple con esto de contar que dentro de la línea existe algo relevante, **que es justamente lo que hace este filtro**.  
+  Busca primero usando el **filtro currencies** que en caso de encontrar algo relevante guarda ese elemento y pasa al siguiente elemento de la lista, y en caso de no encontrar nada pasa a hacer lo mismo pero con el **filtro del idioma general**. Y ahora se repite la historia otra vez, en caso de encontrar algo relevante en el **filtro del idioma general**, actúa como lo hizo con el filtro currency y en caso de no encontrar para a buscar en el filtro de idioma de la línea de texto.
 
-  Una vez que terminamos de analizar todos los elementos, las líneas relevantes pasan por una limpieza de espacios, saltos de línea, tabulaciones, etc y se retorna la longitud del resultado de la limpieza de las líneas relevantes.
+  Una vez que terminamos de analizar todos los elementos, **las líneas relevantes pasan por una limpieza** de espacios, saltos de línea, tabulaciones, etc y **se retorna la longitud del resultado** de la limpieza de las líneas relevantes.
 
-  Este número recién es nuestro primer paso. Nos sirve para más adelante hacer comparaciones con la base de datos. Si el número de caracteres de la página ya pasado por el filtro (que son solo las líneas relevantes) es el mismo que está en la base de datos (que es de un scrap pasado que también pasó por el filtro), damos por entendido que no hubo ningún cambio en los caracteres relevante en los caracteres.  
-  Por otro lado si se agregó cualquier palabra en la misma línea que contiene una palabra relevante, esta línea va a ser tomada como relevante y va a más cantidad de caracteres:
+  **Este número recién es nuestro primer paso**. Nos sirve para más adelante hacer comparaciones con la base de datos. **Si el número de caracteres de la página** ya pasado por el filtro (que son solo las líneas relevantes) **es el mismo** que está en la base de datos (que es de un scrap pasado que también pasó por el filtro), **damos por entendido que no hubo ningún cambio** en los caracteres relevante en los caracteres.  
+  Por otro lado **si se agregó cualquier palabra en la misma línea que contiene una palabra relevante, esta línea va a ser tomada como relevante y va a presentar más cantidad de caracteres:**
 
-  - Caso 1
+  - **Caso 1**
   > Bienvenido a nuestra web!
   **Ofertas imperdibles**
   Para vos tenemos los mejores contenidos 
   **Plan mensual a $442 ARS, incluye Disney +**
 
-  - Caso 2
+  - **Caso 2**
   > Bienvenido a nuestra web!
   **Ofertas imperdibles**
   Para vos tenemos los mejores contenidos 
